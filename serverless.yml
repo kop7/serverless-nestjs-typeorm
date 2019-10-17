@@ -1,0 +1,55 @@
+service:
+  name: serverless-nestjs-crud
+
+plugins:
+  - '@hewmen/serverless-plugin-typescript'  
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage,'local'}
+  
+  # Environment Variables
+  environment:
+    MYSQL_HOST: ${self:custom.mysqlHost.${self:provider.stage}}
+    MYSQL_USER: ${self:custom.mysqlUser.${self:provider.stage}}
+    MYSQL_PASSWORD: ${self:custom.mysqlPassword.${self:provider.stage}}
+    MYSQL_DATABASE: ${self:custom.mysqlDatabase.${self:provider.stage}}
+    MYSQL_PORT: ${self:custom.mysqlPort.${self:provider.stage}}
+
+# Custom Variables
+custom:
+  stages:
+    - local
+    - dev
+  mysqlHost:
+    local: localhost
+  mysqlUser:
+    local: user
+  mysqlPassword:
+    local: password
+  mysqlDatabase:
+    local: dbname
+  mysqlPort:
+    local: '3306'
+package:
+  individually: true
+
+functions:
+
+  author:
+    handler: src/lambda.handler
+    events:
+      - http:
+          method: any
+          path: /api/author
+          cors: true
+
+  book:
+    handler: src/lambda.handler
+    events:
+      - http:
+          method: any
+          path: /api/book
+          cors: true
