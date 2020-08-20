@@ -5,9 +5,6 @@ import { AppModule } from './app.module';
 import {ExpressAdapter} from '@nestjs/platform-express';
 import * as serverless from 'aws-serverless-express';
 import {proxy} from 'aws-serverless-express';
-import {ValidationPipe} from '@nestjs/common';
-
-const binaryMimeTypes: string[] = [];
 
 let cachedServer: Server;
 
@@ -24,9 +21,7 @@ process.on('uncaughtException', (reason) => {
 function bootstrapServer(): Promise<Server> {
   const expressApp = require('express')();
   const adapter = new ExpressAdapter(expressApp);
-  return NestFactory.create(AppModule, adapter)
-      .then(app => app.enableCors())
-      .then(app => app.useGlobalPipes(new ValidationPipe()))
+  return NestFactory.create(AppModule, adapter, { logger: false })
       .then(app => app.init())
       .then(() => serverless.createServer(expressApp));
 }

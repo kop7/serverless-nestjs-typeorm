@@ -4,6 +4,7 @@
     "declaration": true,
     "noImplicitAny": false,
     "removeComments": true,
+    "lib": [ "es2015", "dom" ],
     "noLib": false,
     "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,
@@ -11,7 +12,8 @@
     "target": "es6",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "skipLibCheck": true
   },
   "exclude": ["node_modules"],
   "paths": {
