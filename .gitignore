@@ -2,5 +2,7 @@
 node_modules
 .build
 dist
+.serverless
+.local.sqlite
 yarn.lock
 package-lock.json

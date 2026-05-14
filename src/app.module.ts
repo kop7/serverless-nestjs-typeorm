@@ -1,23 +1,24 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import {TypeOrmModule} from '@nestjs/typeorm';
-import { ConfigModule } from 'nestjs-config';
-import { TypeOrmConfigService } from './config/database';
-import * as path from 'path';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import { createTypeOrmOptions } from './config/database';
 import { BookModule } from './modules/book/book.module';
 import { AuthorModule } from './modules/author/author.module';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-      ConfigModule.load(path.resolve(__dirname, 'config', '**', '!(*.d).{ts,js}')),
-      TypeOrmModule.forRootAsync(
-      {
-        inject: [ConfigModule],
-        useClass: TypeOrmConfigService,
-      }),
-      BookModule,
-      AuthorModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: createTypeOrmOptions,
+    }),
+    BookModule,
+    AuthorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

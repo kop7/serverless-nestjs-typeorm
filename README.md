@@ -1,84 +1,66 @@
-# serverless-nestJS-typeORM-crud
+# Serverless NestJS TypeORM CRUD
 
-##### This is example how to nestjs using the serverless framework
-  - TypeORM
-  - MySql
-  - CRUD
-  
-## setup mysql connection in serverless.yml
-```
-# Custom Variables
-custom:
-  ...
-  mysqlHost:
-    local: localhost
-  mysqlUser:
-    local: user
-  mysqlPassword:
-    local: password
-  mysqlDatabase:
-    local: dbname
-  mysqlPort:
-    local: '3306'
-```
-## How to prepare
-```
-$ npm install serverless -g
-$ git clone https://github.com/kop7/serverless-nestjs-typeorm.git 【projectName】
-$ cd 【projectName】
-$ npm install        
-```
+## 1) What This Is
+A NestJS API running on AWS Lambda via the Serverless Framework, with CRUD endpoints for:
+- `Author`
+- `Book`
 
-## Development
+## 2) Current Architecture
+- Lambda entrypoint: `src/lambda.ts`
+- Root module: `src/app.module.ts`
+- Modules:
+  - `src/modules/author/*`
+  - `src/modules/book/*`
+- Entities:
+  - `src/entity/author.entity.ts`
+  - `src/entity/book.entity.ts`
+- DB config: `src/config/database.ts`
+- Serverless config: `serverless.yml`
 
-```
-$ npm run sls:offline 
-Serverless: Typescript compiled.
-Serverless: Watching typescript files...
-Serverless: Starting Offline: undefined/undefined.
+## 3) Status After the Upgrade Cycle (2026-05-14)
 
-Serverless: Routes for author:
-Serverless: ANY /api/author
+### Implemented
+1. NestJS + TypeORM migrated to a modern stack:
+   - NestJS 11
+   - TypeORM 0.3
+   - `mysql2` driver
+2. Removed `@nestjsx/crud`; introduced explicit CRUD controllers and services.
+3. Migrated from `tslint` to ESLint (flat config).
+4. Added a health endpoint:
+   - `GET /health` (in serverless-offline: `GET /local/health`)
+5. Fixed Lambda bootstrap/caching logic.
+6. Updated `serverless.yml` to `nodejs20.x` runtime and proxy routing.
+7. Added and fixed e2e tests for `book` and `author` CRUD flows.
 
-Serverless: Routes for book:
-Serverless: ANY /api/book
+### Verification (Executed Locally)
+- `npm run build` ✅
+- `npm run lint` ✅
+- `npm test` ✅
+- `npm run test:e2e` ✅
+- `npm run sls:offline` + smoke (`/local/health`, `/local/api/book`) ✅
 
-Serverless: Offline listening on http://localhost:3000
-```
-
-The logs should be :
-
-```  
-Serverless: ANY /api/book (λ: book)
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [NestFactory] Starting Nest application...
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [InstanceLoader] TypeOrmModule dependencies initialized +34ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [InstanceLoader] AppModule dependencies initialized +43ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [InstanceLoader] ConfigModule dependencies initialized +5ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [InstanceLoader] TypeOrmCoreModule dependencies initialized +168ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [InstanceLoader] TypeOrmModule dependencies initialized +1ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [InstanceLoader] TypeOrmModule dependencies initialized +0ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [InstanceLoader] BookModule dependencies initialized +3ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [InstanceLoader] AuthorModule dependencies initialized +0ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RoutesResolver] AppController {/}: +10ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RoutesResolver] BookController {/api/book}: +1ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/, GET} route +6ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/:id, GET} route +3ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/, POST} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/bulk, POST} route +4ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/:id, PATCH} route +4ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/:id, PUT} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/:id, DELETE} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RoutesResolver] AuthorController {/api/author}: +1ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/, GET} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/:id, GET} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/, POST} route +3ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/bulk, POST} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/:id, PATCH} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/:id, PUT} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [RouterExplorer] Mapped {/:id, DELETE} route +2ms
-[Nest] 7980   - 09/02/2019, 6:33:47 PM   [NestApplication] Nest application successfully started +6ms
+## 4) Running Locally
+```bash
+npm install
+npm run sls:offline
 ```
 
+Serverless Offline endpoints are stage-prefixed:
+- `http://localhost:3000/local/health`
+- `http://localhost:3000/local/api/book`
+- `http://localhost:3000/local/api/author`
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/mkop)
+## 5) Plan for Further `package.json` Upgrades (Latest Versions)
+The current combination is selected because it works end-to-end. Next wave toward absolute latest:
 
+1. **Serverless 4 migration**
+   - move `serverless` + `serverless-offline` to 4.x/14.x
+   - handle mandatory authentication/license flow in CI/CD and local environments
+2. **TypeScript track**
+   - stay on TS 6.x and continuously monitor TS 7 breaking changes
+3. **Security hardening**
+   - systematically reduce high vulnerabilities via transitive updates and lockfile refresh
+4. **DB migrations**
+   - replace `synchronize: true` with proper TypeORM migrations for production
+5. **CI pipeline**
+   - add a pipeline that runs `build/lint/test/e2e` and optional `sls package`

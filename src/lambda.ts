@@ -1,32 +1,37 @@
-import { Handler, Context } from 'aws-lambda';
-import { Server } from 'http';
+import { APIGatewayProxyEvent, Context, Handler } from 'aws-lambda';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {ExpressAdapter} from '@nestjs/platform-express';
-import * as serverless from 'aws-serverless-express';
-import {proxy} from 'aws-serverless-express';
+import serverlessExpress from '@codegenie/serverless-express';
 
-let cachedServer: Server;
+let cachedServer: Handler;
 
 process.on('unhandledRejection', (reason) => {
-  // tslint:disable-next-line:no-console
   console.error(reason);
 });
 
 process.on('uncaughtException', (reason) => {
-  // tslint:disable-next-line:no-console
   console.error(reason);
 });
 
-function bootstrapServer(): Promise<Server> {
-  const expressApp = require('express')();
-  const adapter = new ExpressAdapter(expressApp);
-  return NestFactory.create(AppModule, adapter, { logger: false })
-      .then(app => app.init())
-      .then(() => serverless.createServer(expressApp));
+async function bootstrapServer(): Promise<Handler> {
+  const app = await NestFactory.create(AppModule, {
+    logger: false,
+  });
+  await app.init();
+
+  return serverlessExpress({
+    app: app.getHttpAdapter().getInstance(),
+  });
 }
 
-export const handler: Handler = async (event: any, context: Context) => {
-  cachedServer = await bootstrapServer();
-  return proxy(cachedServer, event, context, 'PROMISE').promise;
+export const handler: Handler = async (
+  event: APIGatewayProxyEvent,
+  context: Context,
+  callback,
+) => {
+  if (!cachedServer) {
+    cachedServer = await bootstrapServer();
+  }
+
+  return cachedServer(event, context, callback);
 };

@@ -1,55 +1,63 @@
-service:
-  name: serverless-nestjs-crud
+service: serverless-nestjs-crud
 
 plugins:
-  - '@hewmen/serverless-plugin-typescript'  
+  - serverless-plugin-typescript
   - serverless-offline
 
 provider:
   name: aws
-  runtime: nodejs8.10
-  stage: ${opt:stage,'local'}
-  
-  # Environment Variables
+  runtime: nodejs20.x
+  stage: ${opt:stage, 'local'}
+  region: ${opt:region, 'eu-central-1'}
   environment:
+    DB_TYPE: ${self:custom.dbType.${self:provider.stage}, 'mysql'}
+    DB_DATABASE: ${self:custom.dbDatabase.${self:provider.stage}, ':memory:'}
     MYSQL_HOST: ${self:custom.mysqlHost.${self:provider.stage}}
     MYSQL_USER: ${self:custom.mysqlUser.${self:provider.stage}}
     MYSQL_PASSWORD: ${self:custom.mysqlPassword.${self:provider.stage}}
     MYSQL_DATABASE: ${self:custom.mysqlDatabase.${self:provider.stage}}
     MYSQL_PORT: ${self:custom.mysqlPort.${self:provider.stage}}
 
-# Custom Variables
 custom:
+  serverless-offline:
+    useInProcess: true
   stages:
     - local
     - dev
+  dbType:
+    local: sqlite
+    dev: mysql
+  dbDatabase:
+    local: '.local.sqlite'
+    dev: app
   mysqlHost:
-    local: localhost
+    local: ''
+    dev: localhost
   mysqlUser:
-    local: user
+    local: root
+    dev: root
   mysqlPassword:
-    local: password
+    local: ''
+    dev: ''
   mysqlDatabase:
-    local: dbname
+    local: app
+    dev: app
   mysqlPort:
     local: '3306'
+    dev: '3306'
+
 package:
   individually: true
 
 functions:
-
-  author:
+  api:
     handler: src/lambda.handler
     events:
       - http:
           method: any
-          path: /api/author
+          path: /
           cors: true
-
-  book:
-    handler: src/lambda.handler
-    events:
       - http:
           method: any
-          path: /api/book
+          path: /{proxy+}
           cors: true

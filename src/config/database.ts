@@ -1,28 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
-import { ConnectionManager, getConnectionManager } from 'typeorm';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 
-@Injectable()
-export class TypeOrmConfigService implements TypeOrmOptionsFactory {
-    async createTypeOrmOptions(): Promise<TypeOrmModuleOptions> {
-        const connectionManager: ConnectionManager = getConnectionManager();
-        let options: any;
+export const createTypeOrmOptions = (
+  configService: ConfigService,
+): TypeOrmModuleOptions => {
+  const dbType = configService.get<string>('DB_TYPE');
 
-        if (connectionManager.has('default')) {
-            options = connectionManager.get('default').options;
-            await connectionManager.get('default').close();
-        } else {
-            options = {
-                type: 'mysql',
-                host: process.env.MYSQL_HOST,
-                username: process.env.MYSQL_USER,
-                password: process.env.MYSQL_PASSWORD,
-                database: process.env.MYSQL_DATABASE,
-                port: parseInt(process.env.MYSQL_PORT, 10),
-                entities: [__dirname + '/../entity/**.entity{.ts,.js}'],
-                synchronize: true,
-            } as TypeOrmModuleOptions;
-        }
-        return options;
-    }
-}
+  if (dbType === 'sqlite' || !configService.get<string>('MYSQL_HOST')) {
+    return {
+      type: 'sqlite',
+      database: configService.get<string>('DB_DATABASE', ':memory:'),
+      autoLoadEntities: true,
+      synchronize: true,
+    };
+  }
+
+  return {
+    type: 'mysql',
+    host: configService.get<string>('MYSQL_HOST', 'localhost'),
+    port: parseInt(configService.get<string>('MYSQL_PORT', '3306'), 10),
+    username: configService.get<string>('MYSQL_USER', 'root'),
+    password: configService.get<string>('MYSQL_PASSWORD', ''),
+    database: configService.get<string>('MYSQL_DATABASE', 'app'),
+    autoLoadEntities: true,
+    synchronize: true,
+  };
+};

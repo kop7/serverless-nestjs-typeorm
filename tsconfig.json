@@ -4,27 +4,30 @@
     "declaration": true,
     "noImplicitAny": false,
     "removeComments": true,
-    "lib": [ "es2015", "dom" ],
-    "noLib": false,
+    "lib": ["es2022"],
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es6",
+    "target": "es2022",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "skipLibCheck": true
+    "moduleResolution": "node",
+    "types": ["node", "jest"],
+    "ignoreDeprecations": "6.0",
+    "skipLibCheck": true,
+    "paths": {
+      "@db-config/*": [
+        "src/config/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@entities/*": [
+        "src/entity/*"
+      ]
+    }
   },
-  "exclude": ["node_modules"],
-  "paths": {
-    "@db-config/*": [
-      "src/config/*"
-    ],
-    "@modules/*":[
-      "src/modules/*"
-    ],
-    "@entities/*": [
-      "src/entity/*"
-    ]
-  }
+  "exclude": ["node_modules", "dist"]
 }
